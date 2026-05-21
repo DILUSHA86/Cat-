@@ -1,4 +1,38 @@
-import React, { useState, useEffect } from 'react';
+// Load your HUD notification sound
+const alertSound = new Audio('assets/sounds/ping.mp3');
+
+// HUD Settings State (This could be tied to a toggle in your UI)
+let settings = {
+  muteOutsiders: true,
+  combatFocusMode: false 
+};
+
+// Function called whenever a new event or message arrives
+function processIncomingNotification(sender, data) {
+  // Define what makes someone an "outsider"
+  const isOutsider = !sender.isFriend && !sender.isInParty;
+  
+  // Intelligent Audio Routing
+  if (isOutsider && settings.muteOutsiders) {
+    // 1. Silent Visual Alert Only
+    displayVisualHudMessage(sender.name, data.message, "low-priority");
+    console.log("Audio muted for outsider notification.");
+  } else {
+    // 2. Full Audio-Visual Alert for allies or if mute is off
+    alertSound.play();
+    displayVisualHudMessage(sender.name, data.message, "high-priority");
+  }
+}
+
+// Example visual function 
+function displayVisualHudMessage(name, text, priority) {
+  // Logic to inject the message into your HTML/CSS HUD layout
+}
+<div class="hud-audio-settings">
+  <label for="outsider-mute">Mute Outsider Pings:</label>
+  <input type="checkbox" id="outsider-mute" checked>
+</div>
+ import React, { useState, useEffect } from 'react';
 import './NeuralHud.css';
 
 const COMPLEXITY_THRESHOLD = 5; // Set your threshold value as needed
