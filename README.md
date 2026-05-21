@@ -1,4 +1,72 @@
 
+
+// ADX_AI Web Audio Synthesizer
+let audioCtx;
+let droneOscillator;
+let pulseOscillator;
+let filterNode;
+let gainNode;
+
+// Note: Browsers require a user action (like a click) to start audio.
+// Call this function when the user clicks an "Initialize System" button.
+function bootAudioEngine() {
+    // 1. Initialize the Web Audio Context
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // --- LAYER 1: Deep Quantum Drone (Sub-bass) ---
+    droneOscillator = audioCtx.createOscillator();
+    droneOscillator.type = 'sine';
+    droneOscillator.frequency.value = 55; // Low bass frequency (55Hz)
+    
+    const droneGain = audioCtx.createGain();
+    droneGain.gain.value = 0.4; // Keep the drone quiet but present
+
+    droneOscillator.connect(droneGain);
+    droneGain.connect(audioCtx.destination);
+    droneOscillator.start();
+
+    // --- LAYER 2: Data Pulse Synth (The dynamic layer) ---
+    pulseOscillator = audioCtx.createOscillator();
+    pulseOscillator.type = 'sawtooth'; // Gives that harsh, digital, cyberpunk edge
+    
+    // Create a filter to muffle or brighten the sound dynamically
+    filterNode = audioCtx.createBiquadFilter();
+    filterNode.type = 'lowpass';
+    filterNode.frequency.value = 400; // Starting filter frequency
+
+    // Gain node for the pulse (volume)
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0; // Starts silent until data arrives
+
+    // Connect the chain: Oscillator -> Filter -> Gain -> Output
+    pulseOscillator.connect(filterNode);
+    filterNode.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    pulseOscillator.start();
+
+    console.log("🔊 [AUDIO] Z-Turbo Synthesizer Online.");
+}
+
+// 3. The Hook for your AR Render Loop
+// This function gets called 30 times a second from your Parameter Smoother!
+function updateWebAudioSynthesizer(intensity, frequency) {
+    if (!audioCtx) return; // Wait until audio is booted
+
+    // MAP THE DATA TO THE SOUND:
+    
+    // Map Intensity (0.0 to 1.0) to Volume (Gain)
+    // We use setTargetAtTime for ultra-smooth hardware-level blending
+    gainNode.gain.setTargetAtTime(intensity * 0.5, audioCtx.currentTime, 0.05);
+
+    // Map Frequency (e.g., 0 to 100) to Pitch (Hz)
+    // Converts your data into a pitch range between 100Hz and 800Hz
+    const pitch = 100 + (frequency * 7); 
+    pulseOscillator.frequency.setTargetAtTime(pitch, audioCtx.currentTime, 0.05);
+
+    // Dynamic Filter: Higher intensity makes the sound "brighter" and more aggressive
+    const filterFreq = 400 + (intensity * 2000); 
+    filterNode.frequency.setTargetAtTime(filterFreq, audioCtx.currentTime, 0.05);
+}
 // The ADX_AI Real-Time Frontend Pipeline
 
 let currentData = { intensity: 0, frequency: 0 }; // Where we are right now
