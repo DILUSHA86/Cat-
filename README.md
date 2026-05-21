@@ -1,3 +1,38 @@
+
+// The ADX_AI Real-Time Frontend Pipeline
+
+let currentData = { intensity: 0, frequency: 0 }; // Where we are right now
+let targetData = { intensity: 0, frequency: 0 };  // Where the 5s Sensor tells us to go
+
+// 1. Network Sensor (Fires every 5 seconds)
+setInterval(async () => {
+    // Fetching new prediction from your AWS/SeaArt Backend
+    targetData = await fetchNeuralPrediction(); 
+    console.log("📡 [SENSOR] New target data received:", targetData);
+}, 5000);
+
+// 2. The AR Emitter & Parameter Smoother (Runs at 30Hz / ~33ms per frame)
+function arRenderLoop() {
+    // The 15% Blend (Lerp): Moves current value 15% closer to target value every frame
+    const blendRate = 0.15; 
+    
+    currentData.intensity += (targetData.intensity - currentData.intensity) * blendRate;
+    currentData.frequency += (targetData.frequency - currentData.frequency) * blendRate;
+
+    // 3. Output to WebGL Shaders
+    updateWebGLShaders(currentData.intensity);
+
+    // 4. Output to Web Audio API
+    updateWebAudioSynthesizer(currentData.frequency);
+
+    // Loop at roughly 30Hz
+    setTimeout(() => {
+        requestAnimationFrame(arRenderLoop);
+    }, 1000 / 30);
+}
+
+// Boot up the visualizer
+arRenderLoop();
 // Load your HUD notification sound
 const alertSound = new Audio('assets/sounds/ping.mp3');
 
