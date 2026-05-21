@@ -1,6 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import './NeuralHud.css';
 
+const COMPLEXITY_THRESHOLD = 5; // Set your threshold value as needed
+
+const AdaptiveHudElement = ({ dataStream }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (dataStream?.complexity > COMPLEXITY_THRESHOLD) {
+      setIsProcessing(true);
+      const timer = setTimeout(() => setIsProcessing(false), 1500);
+      return () => clearTimeout(timer); // Clean up if component unmounts or dataStream changes
+    }
+  }, [dataStream]);
+
+  return (
+    <div className="hud-container">
+      <div className="hud-data-readout">
+        <p>Telemetry: {dataStream?.value}</p>
+      </div>
+      {isProcessing && (
+        <div className="neural-feedback">
+          <div className="neural-node"></div>
+          <span>Recalculating optimal parameters...</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdaptiveHudElement;import React, { useState, useEffect } from 'react';
+import './NeuralHud.css';
+
 const AdaptiveHudElement = ({ dataStream }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
