@@ -1,5 +1,5 @@
-
-
+[Cordx] Auto: minimal | latency: 520ms | echo: 0.85
+[Cordx] Auto: minimal | latency: 520ms | echo: 0.85
 // ADX_AI Web Audio Synthesizer
 let audioCtx;
 let droneOscillator;
